@@ -1,0 +1,65 @@
+LeNet(
+  (conv1): Conv2d (1, 6, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+  (conv2): Conv2d (6, 16, kernel_size=(5, 5), stride=(1, 1))
+  (fc1): Linear(in_features=400, out_features=120)
+  (fc2): Linear(in_features=120, out_features=84)
+  (fc3): Linear(in_features=84, out_features=10)
+)
+1. Loading data
+2. Converting data
+torch.Size([42000, 1, 28, 28]) torch.Size([42000, 1])
+3. Training phase
+Epoch = 2000, Loss = 2.265090
+Epoch = 4000, Loss = 2.282602
+Epoch = 6000, Loss = 2.252312
+Epoch = 8000, Loss = 2.134518
+Epoch = 10000, Loss = 0.569533
+Epoch = 12000, Loss = 0.392732
+Epoch = 14000, Loss = 0.304480
+Epoch = 16000, Loss = 0.385660
+Epoch = 18000, Loss = 0.210530
+Epoch = 20000, Loss = 0.079906
+Epoch = 22000, Loss = 0.123844
+Epoch = 24000, Loss = 0.094619
+Epoch = 26000, Loss = 0.015574
+Epoch = 28000, Loss = 0.055368
+Epoch = 30000, Loss = 0.757412
+Epoch = 32000, Loss = 0.108914
+Epoch = 34000, Loss = 0.149840
+Epoch = 36000, Loss = 0.015032
+Epoch = 38000, Loss = 0.012837
+Epoch = 40000, Loss = 0.098195
+Epoch = 42000, Loss = 0.014875
+Epoch = 44000, Loss = 0.195885
+Epoch = 46000, Loss = 0.005274
+Epoch = 48000, Loss = 0.079494
+Epoch = 50000, Loss = 0.113439
+Epoch = 52000, Loss = 0.001747
+Epoch = 54000, Loss = 0.020607
+Epoch = 56000, Loss = 0.003344
+Epoch = 58000, Loss = 0.016969
+Epoch = 60000, Loss = 0.001325
+Epoch = 62000, Loss = 0.001718
+Epoch = 64000, Loss = 0.001819
+Epoch = 66000, Loss = 0.014081
+Epoch = 68000, Loss = 0.001861
+Epoch = 70000, Loss = 0.013316
+Epoch = 72000, Loss = 0.008059
+Epoch = 74000, Loss = 0.015042
+4. Testing phase
+torch.Size([28000, 1, 28, 28])
+Total tested = 2000
+Total tested = 4000
+Total tested = 6000
+Total tested = 8000
+Total tested = 10000
+Total tested = 12000
+Total tested = 14000
+Total tested = 16000
+Total tested = 18000
+Total tested = 20000
+Total tested = 22000
+Total tested = 24000
+Total tested = 26000
+Total tested = 28000
+5. Generating submission file
