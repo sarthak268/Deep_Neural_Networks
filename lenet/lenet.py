@@ -33,13 +33,6 @@ class LeNet(nn.Module):
 net = LeNet()
 print (net)
 
-# use_gpu = torch.cuda.is_available()
-# if use_gpu:
-# 	net = net.cuda()
-# 	print ('USE GPU')
-# else:
-# 	print ('USE CPU')
-
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001)
 
@@ -75,9 +68,7 @@ for epoch in range(nb_epoch):
 	mini_label = Variable(X_label[nb_index:(nb_index+nb_batch)].clone(), requires_grad = False)
 	mini_data  = mini_data.type(torch.FloatTensor)
 	mini_label = mini_label.type(torch.LongTensor)
-	# if use_gpu:
-	# 	mini_data  = mini_data.cuda()
-	# 	mini_label = mini_label.cuda()
+	
 	optimizer.zero_grad()
 	mini_out   = net(mini_data)
 	mini_label = mini_label.view(nb_batch)
@@ -103,8 +94,7 @@ final_prediction = np.ndarray(shape = (nb_test, 2), dtype=int)
 for each_sample in range(nb_test):
 	sample_data = Variable(Y_data[each_sample:each_sample+1].clone())
 	sample_data = sample_data.type(torch.FloatTensor)
-	# if use_gpu:
-	# 	sample_data = sample_data.cuda()
+	
 	sample_out = net(sample_data)
 	_, pred = torch.max(sample_out, 1)
 	final_prediction[each_sample][0] = 1 + each_sample
