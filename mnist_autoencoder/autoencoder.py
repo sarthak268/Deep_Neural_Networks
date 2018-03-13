@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from torch.autograd import Variable 
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
 
 root = './data'
 download = False
@@ -47,17 +46,49 @@ test_loader = torch.utils.data.DataLoader(
 
 # images are 28*28
 
-class Net(nn.Module):
-        def __init__(self, batch_size, input_size):
-                super(Net, self).__init__()
-                self.l1 = nn.Linear(input_size, 100)
-                self.l2 = nn.Linear(100, input_size)
-        def forward(self, x):
-                encoded = self.l1(x)
-                decoded = self.l2(encoded)
-                return encoded, decoded
+#==========================================================
 
-net = Net(batch_size=batch_size,input_size=input_size)
+class Net(nn.Module):
+    def __init__(self, batch_size, input_size):
+            super(Net, self).__init__()
+            self.l1 = nn.Linear(input_size, 100)
+            self.l2 = nn.Linear(100, input_size)
+    def forward(self, x):
+            encoded = self.l1(x)
+            decoded = self.l2(encoded)
+            return encoded, decoded
+
+class Lenet(nn.Module):
+    def __init__(self, batch_size, input_size):
+        super(Lenet, self).__init__()
+        self.conv1 = nn.Conv2d(1, 6, (5,5))
+        self.conv2 = nn.Conv2d(6, 10, (5,5))
+        self.l1 = nn.Linear(10*5*5, 120)
+        self.l2 = nn.Linear(120, 60)
+        self.l3 = nn.Linear(60, 10)
+        
+        self.l4 = nn.Linear(10, 60)
+        self.l5 = nn.Linear(60, 120)
+        self.l6 = nn.Linear(120, 10*5*5)
+
+    def forward(self, x):
+        x = f.max_pool2d(f.relu(self.conv1(x)), (2,2))
+        x = f.max_pool2d(f.relu(self.conv1(x)), (2,2))
+        x = x.view(-1, 16*5*5)
+        x = f.relu(self.l1(x))
+        x = f.relu(self.l2(x))
+        encoded = self.l3(x)
+
+        y = encoded
+        y = self.l4(y)
+        y = self.l5(y)
+        y = self.l6(y)
+
+
+        return encoded #,decoded
+
+
+net = Lenet(batch_size=batch_size,input_size=input_size)
 
 optimizer = torch.optim.Adam(net.parameters(),lr=10**(-4))
 loss_function = nn.MSELoss()
@@ -71,6 +102,9 @@ plt.ion()
 
 view_data = Variable(train_set.train_data[:N_TEST_IMG].view(-1,28*28).type(torch.FloatTensor)/255.)
 
+#=====================================================================================================
+# For linear one layered nn
+'''
 for i in range (N_TEST_IMG):
         a[0][i].imshow(np.reshape(view_data.data.numpy()[i],(28,28)),cmap = "gray")
         a[0][i].set_xticks(())
@@ -102,8 +136,10 @@ for epoch in range(EPOCH):
                         a[1][i].set_yticks(())
                 plt.draw()
                 if (count == 1):
-                        f.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/mnist_autoencoder/images'+ str(epoch) +'.jpg')
+                        f.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/mnist_autoencoder/images/'+ str(epoch) +'.jpg')
                 plt.pause(0.05)
+'''
+#======================================================================================================
 
 
 
