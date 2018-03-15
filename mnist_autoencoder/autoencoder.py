@@ -58,11 +58,47 @@ class Net(nn.Module):
             decoded = self.l2(encoded)
             return encoded, decoded
 
+'''class ConvLayer(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride):
+        super(ConvLayer, self).__init__()
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = torch.nn.ReflectionPad2d(reflection_padding)
+        self.conv2d = torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        out = self.reflection_pad(x)
+        out = self.conv2d(out)
+        return out
+
+class UpsampleConvLayer(torch.nn.Module):
+    """UpsampleConvLayer
+    Upsamples the input and then does a convolution. This method gives better results
+    compared to ConvTranspose2d.
+    ref: http://distill.pub/2016/deconv-checkerboard/
+    """
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
+        super(UpsampleConvLayer, self).__init__()
+        self.upsample = upsample
+        if upsample:
+            self.upsample_layer = torch.nn.UpsamplingNearest2d(scale_factor=upsample)
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = torch.nn.ReflectionPad2d(reflection_padding)
+        self.conv2d = torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        x_in = x
+        if self.upsample:
+            x_in = self.upsample_layer(x_in)
+        out = self.reflection_pad(x_in)
+        out = self.conv2d(out)
+        return out
+
 class Lenet(nn.Module):
     def __init__(self, batch_size, input_size):
         super(Lenet, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, (5,5))
-        self.conv2 = nn.Conv2d(6, 10, (5,5))
+        self.conv1 = ConvLayer(1, 6, kernel_size=5, stride=1)
+        self.conv2 = ConvLayer(6, 10, kernel_size=5, stride=1)
         self.l1 = nn.Linear(10*5*5, 120)
         self.l2 = nn.Linear(120, 60)
         self.l3 = nn.Linear(60, 10)
@@ -70,25 +106,29 @@ class Lenet(nn.Module):
         self.l4 = nn.Linear(10, 60)
         self.l5 = nn.Linear(60, 120)
         self.l6 = nn.Linear(120, 10*5*5)
+        self.deconv1 = UpsampleConvLayer(6, 10, kernel_size=5, stride=1, upsample=2)
+        self.deconv2 = UpsampleConvLayer(1, 6, kernel_size=5, stride=1, upsample=2)
 
     def forward(self, x):
-        x = f.max_pool2d(f.relu(self.conv1(x)), (2,2))
-        x = f.max_pool2d(f.relu(self.conv1(x)), (2,2))
-        x = x.view(-1, 16*5*5)
+        x = f.relu(self.conv1(x))
+        x = f.relu(self.conv2(x))
+        x = x.view(-1, 10*5*5)
         x = f.relu(self.l1(x))
         x = f.relu(self.l2(x))
         encoded = self.l3(x)
 
         y = encoded
-        y = self.l4(y)
-        y = self.l5(y)
-        y = self.l6(y)
+        y = f.relu(self.l4(y))
+        y = f.relu(self.l5(y))
+        y = f.relu(self.l6(y))
+        y = y.view(10,5*5)
+        y = f.relu(self.deconv1(y))
+        decoded = self.deconv2(y)
 
+        return encoded ,decoded
+'''
 
-        return encoded #,decoded
-
-
-net = Lenet(batch_size=batch_size,input_size=input_size)
+net = Net(batch_size=batch_size,input_size=input_size)
 
 optimizer = torch.optim.Adam(net.parameters(),lr=10**(-4))
 loss_function = nn.MSELoss()
