@@ -24,7 +24,7 @@ def to_img(x):
     return x
 
 
-num_epochs = 100
+num_epochs = 50
 batch_size = 128
 learning_rate = 1e-3
 
@@ -36,8 +36,12 @@ img_transform = transforms.Compose([
 #dataset = MNIST('./data', transform=img_transform, download=True)
 #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-def write(file):
-    
+def write(arr,file):
+    for i in range (len(arr)):
+        for j in range (3):
+            file.write(str(arr[i][j]) + " ")
+        file.write("\n")    
+
 
 class VAE(nn.Module):
     def __init__(self):
@@ -95,7 +99,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 def train(batchsize):
     train_set = torch.utils.data.DataLoader(datasets.MNIST('./data',train=True,download=True,transform=transforms.ToTensor()),batch_size=batchsize, shuffle=True)
-    
+
     for epoch in range(num_epochs):
         model.train()
         train_loss = 0
@@ -103,8 +107,7 @@ def train(batchsize):
             img, _ = data
             img = img.view(img.size(0), -1)
             img = Variable(img)
-            if torch.cuda.is_available():
-                img = img.cuda()
+        
             optimizer.zero_grad()
             recon_batch, mu, logvar = model(img)
             loss = loss_function(recon_batch, img, mu, logvar)
@@ -115,9 +118,13 @@ def train(batchsize):
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch,
                     batch_idx * len(img),
-                    len(train_set.dataset), 100. * batch_idx / len(train_set),
+                    len(train_set.dataset), 
+                    100. * batch_idx / len(train_set),
                     loss.data[0] / len(img)))
-                array.append([epoch,len(train_set.dataset),loss.data[0] / len(img), 100. * batch_idx / len(train_set)])
+
+            ########################################
+            array.append([epoch, loss.data[0] / len(img), 100. * batch_idx / len(train_set)])
+                # epoch, loss, percentage
 
         print('====> Epoch: {} Average loss: {:.4f}'.format(
             epoch, train_loss / len(train_set.dataset)))
@@ -125,15 +132,20 @@ def train(batchsize):
             save = to_img(recon_batch.cpu().data)
             save_image(save, './vae_img/image_{}.png'.format(epoch))
 
-    file = open(“testfile.txt”,”w”) 
-    write(file)
+    file = open("data_vae.txt","w") 
+    write(array,file)
     file.close()
-
     return model
 
+'''file = open("data_vae.txt","w") 
+write(array,file)
+file.close()
+'''
+#return model
+
 def test(model,batchsize):
-    test_set=torch.utils.data.DataLoader(datasets.MNIST('./data',train=False,download=True,transform=transforms.ToTensor(),batch_size=batchsize,shuffle=False))
-    r=random.randint(test_set.dataset)
+    test_set=torch.utils.data.DataLoader(datasets.MNIST('./data',train=False,download=True,transform=transforms.ToTensor()),batch_size=batchsize,shuffle=False)
+    r=random.randint(0,len(test_set.dataset))
     test_image=test_set.dataset[r][0]
     input_image=test_image.view(28,28).numpy()
     out, mu1, logvar1 = model(Variable(test_image))
@@ -145,9 +157,8 @@ def test(model,batchsize):
     
 
 model = train(batchsize = batch_size)
-test(model,batchsize = batch_size)
+#test(model,batchsize = batch_size)
 torch.save(model.state_dict(), './vae.pth')
-
 
 
 
