@@ -12,7 +12,13 @@ from torchvision.datasets import MNIST
 import os
 import random
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+from util import *
+from glob import glob
+
+import copy
+import pickle
 
 array = []
 
@@ -24,13 +30,12 @@ def to_img(x):
     x = x.view(x.size(0), 1, 28, 28)
     return x
 
-num_epochs = 50
+num_epochs = 1
 batch_size = 128
 learning_rate = 1e-3
 
 mean = Variable(torch.zeros(128,20))
 log_variance = Variable(torch.zeros(128,20))
-
 
 img_transform = transforms.Compose([transforms.ToTensor()])
 
@@ -57,7 +62,6 @@ class VAE(nn.Module):
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
-        #print("size of std: ",std.size())
         eps = torch.FloatTensor(std.size()).normal_()
         eps = Variable(eps)
         return eps.mul(std).add_(mu)
@@ -75,7 +79,6 @@ class VAE(nn.Module):
         global log_variance
         mu, logvar = self.encode(x)
         mean = mu
-        #print("hahaha : ",mean.size())
         log_variance = logvar
         z = self.reparametrize(mu, logvar)
         return self.decode(z), mu, logvar
@@ -112,7 +115,6 @@ def train(batchsize):
             img, _ = data
             img = img.view(img.size(0), -1)
             img = Variable(img)
-        
             optimizer.zero_grad()
             recon_batch, mu, logvar = model(img)
             loss = loss_function(recon_batch, img, mu, logvar)
@@ -137,7 +139,7 @@ def train(batchsize):
             save = to_img(recon_batch.cpu().data)
             save_image(save, './vae_img/image_{}.png'.format(epoch))
 
-    file = open("data_vae.txt","w") 
+    file = open("/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/data_vae.txt","w") 
     write(array,file)
     file.close()
     return model
@@ -155,7 +157,6 @@ def test(model,batchsize):
     plt.imshow(plot_image, cmap = 'gray', interpolation = 'nearest');
     plt.show()
 
-
 m11 = mean
 l11 = log_variance
 
@@ -163,15 +164,29 @@ model = train(batchsize = batch_size)
 
 z = model.get_latent_variable(m11, l11)
 output_generated_image = model.decode(z)
-
-out1 = random.randint(0,127)    # randomly selecting any one image from mini batch
 output_generated_image = output_generated_image.data.numpy()
 
-output_generated_image1 = output_generated_image[out1].reshape(28,28)   # outputing one random image 
+output_generated_image = torch.FloatTensor(output_generated_image)
+#output_generated_image = (output_generated_image.unsqueeze(0)).unsqueeze(0)
 
-plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
+output_generated_image.view(128,1,28,28)
+
+out = torchvision.utils.make_grid(output_generated_image)
+
+out = out.numpy()
+
+plt.imshow(out, cmap = 'gray', interpolation = 'nearest')
 plt.show()
 
+#out1 = random.randint(0,127)    # randomly selecting any one image from mini batch
+
+#output_generated_image1 = output_generated_image[out1].reshape(28,28)   # outputing one random image 
+
+
+#plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
+#plt.show()
+#matplotlib.image.imsave('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/50epoch_generated_image.jpg',output_generated_image1)
+#test(model,batchsize=batch_size)
 # saving model
 torch.save(model.state_dict(), './vae.pth')
 
