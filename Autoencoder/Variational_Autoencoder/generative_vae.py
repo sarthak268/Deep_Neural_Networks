@@ -14,11 +14,6 @@ import random
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from util import *
-from glob import glob
-
-import copy
-import pickle
 
 array = []
 
@@ -30,7 +25,7 @@ def to_img(x):
     x = x.view(x.size(0), 1, 28, 28)
     return x
 
-num_epochs = 1
+num_epochs = 50
 batch_size = 128
 learning_rate = 1e-3
 
@@ -167,24 +162,17 @@ output_generated_image = model.decode(z)
 output_generated_image = output_generated_image.data.numpy()
 
 output_generated_image = torch.FloatTensor(output_generated_image)
-#output_generated_image = (output_generated_image.unsqueeze(0)).unsqueeze(0)
 
-output_generated_image.view(128,1,28,28)
+output_generated_image = output_generated_image.view(128,1,28,28)
 
-out = torchvision.utils.make_grid(output_generated_image)
-
-out = out.numpy()
-
-plt.imshow(out, cmap = 'gray', interpolation = 'nearest')
-plt.show()
-
-#out1 = random.randint(0,127)    # randomly selecting any one image from mini batch
-
-#output_generated_image1 = output_generated_image[out1].reshape(28,28)   # outputing one random image 
-
+for i in range (127):
+    output_generated_image_one = output_generated_image[i].numpy().reshape(28,28)
+    plt.imshow(output_generated_image_one, cmap = 'gray', interpolation = 'nearest')
+    plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-normal_vae_without_generator/generated_images/epoch50/' + str(i) + '.png')
 
 #plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
 #plt.show()
+
 #matplotlib.image.imsave('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/50epoch_generated_image.jpg',output_generated_image1)
 #test(model,batchsize=batch_size)
 # saving model
