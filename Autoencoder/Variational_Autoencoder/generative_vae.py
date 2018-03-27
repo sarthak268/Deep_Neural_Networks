@@ -25,7 +25,7 @@ def to_img(x):
     x = x.view(x.size(0), 1, 28, 28)
     return x
 
-num_epochs = 50
+num_epochs = 100
 batch_size = 128
 learning_rate = 1e-3
 
@@ -134,7 +134,7 @@ def train(batchsize):
             save = to_img(recon_batch.cpu().data)
             save_image(save, './vae_img/image_{}.png'.format(epoch))
 
-    file = open("/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/data_vae.txt","w") 
+    file = open("/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model/data_vae.txt","w") 
     write(array,file)
     file.close()
     return model
@@ -168,7 +168,7 @@ output_generated_image = output_generated_image.view(128,1,28,28)
 for i in range (127):
     output_generated_image_one = output_generated_image[i].numpy().reshape(28,28)
     plt.imshow(output_generated_image_one, cmap = 'gray', interpolation = 'nearest')
-    plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-normal_vae_without_generator/generated_images/epoch50/' + str(i) + '.png')
+    plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model/generated_images/epoch100/' + str(i) + '.png')
 
 #plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
 #plt.show()
