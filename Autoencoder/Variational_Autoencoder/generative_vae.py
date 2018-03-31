@@ -14,6 +14,7 @@ import random
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import pickle
 
 array = []
 
@@ -25,7 +26,7 @@ def to_img(x):
     x = x.view(x.size(0), 1, 28, 28)
     return x
 
-num_epochs = 100
+num_epochs = 1
 batch_size = 128
 learning_rate = 1e-3
 
@@ -175,10 +176,15 @@ for i in range (127):
 
 #matplotlib.image.imsave('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/50epoch_generated_image.jpg',output_generated_image1)
 #test(model,batchsize=batch_size)
+
+
+
+
+############################################
 # saving model
 torch.save(model.state_dict(), './vae.pth')
 
-
+############################################
 
 
 
