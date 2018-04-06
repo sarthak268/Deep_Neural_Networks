@@ -13,8 +13,9 @@ import os
 import random
 import numpy as np
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import pickle
+import random
 
 array = []
 
@@ -140,37 +141,46 @@ def train(batchsize):
     file.close()
     return model
 
+#========================================================
+# def test(model,batchsize):
+#     test_set = torch.utils.data.DataLoader(datasets.MNIST('./data',train = False,download = True,transform = transforms.ToTensor()),batch_size = batchsize,shuffle = False)
+#     r = random.randint(0,len(test_set.dataset))
+#     test_image = test_set.dataset[r][0]
+#     input_image = test_image.view(28,28).numpy()
+#     out, mu1, logvar1 = model(Variable(test_image))
+#     output_image = out.view(28,28).data.numpy()
 
-def test(model,batchsize):
-    test_set = torch.utils.data.DataLoader(datasets.MNIST('./data',train = False,download = True,transform = transforms.ToTensor()),batch_size = batchsize,shuffle = False)
-    r = random.randint(0,len(test_set.dataset))
-    test_image = test_set.dataset[r][0]
-    input_image = test_image.view(28,28).numpy()
-    out, mu1, logvar1 = model(Variable(test_image))
-    output_image = out.view(28,28).data.numpy()
+#     plot_image = np.concatenate((input_image, output_image), axis = 1) 
+#     plt.imshow(plot_image, cmap = 'gray', interpolation = 'nearest');
+#     plt.show()
 
-    plot_image = np.concatenate((input_image, output_image), axis = 1) 
-    plt.imshow(plot_image, cmap = 'gray', interpolation = 'nearest');
-    plt.show()
+# m11 = mean
+# l11 = log_variance
 
-m11 = mean
-l11 = log_variance
+# model = train(batchsize = batch_size)
 
-model = train(batchsize = batch_size)
+# z = model.get_latent_variable(m11, l11)
+# output_generated_image = model.decode(z)
+# output_generated_image = output_generated_image.data.numpy()
 
-z = model.get_latent_variable(m11, l11)
-output_generated_image = model.decode(z)
-output_generated_image = output_generated_image.data.numpy()
+# output_generated_image = torch.FloatTensor(output_generated_image)
 
-output_generated_image = torch.FloatTensor(output_generated_image)
+# output_generated_image = output_generated_image.view(128,1,28,28)
 
-output_generated_image = output_generated_image.view(128,1,28,28)
+# for i in range (127):
+#     output_generated_image_one = output_generated_image[i].numpy().reshape(28,28)
+#     plt.imshow(output_generated_image_one, cmap = 'gray', interpolation = 'nearest')
+#     plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model/generated_images/epoch100/' + str(i) + '.png')
+#=======================================================
 
-for i in range (127):
-    output_generated_image_one = output_generated_image[i].numpy().reshape(28,28)
-    plt.imshow(output_generated_image_one, cmap = 'gray', interpolation = 'nearest')
-    plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model/generated_images/epoch100/' + str(i) + '.png')
-
+def test(model):
+	z = torch.FloatTensor(20).normal_()
+	x = Variable(z)
+	y = model.decode(x)
+	im = y.view(28,28).data.numpy()
+	plt.imshow(im, cmap = 'gray', interpolation = 'nearest')
+	plt.savefig('./imgtest.jpg')
+	#y = numpy(y)
 #plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
 #plt.show()
 
@@ -181,8 +191,11 @@ for i in range (127):
 
 
 ############################################
+
+test(model=model)
+
 # saving model
-torch.save(model.state_dict(), './vae.pth')
+# torch.save(model.state_dict(), './vae.pth')
 
 ############################################
 
