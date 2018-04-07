@@ -99,6 +99,12 @@ def loss_function(recon_x, x, mu, logvar):
     # KL divergence
     return BCE + KLD
 
+def my_subplot(y1):
+    for i in range(128):
+        plt.subplot(16, 8, y1[i])
+    plt.subplot_tool()
+    plt.show()
+    plt.savefig('./imgtest.jpg')
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -142,17 +148,6 @@ def train(batchsize):
     return model
 
 #========================================================
-# def test(model,batchsize):
-#     test_set = torch.utils.data.DataLoader(datasets.MNIST('./data',train = False,download = True,transform = transforms.ToTensor()),batch_size = batchsize,shuffle = False)
-#     r = random.randint(0,len(test_set.dataset))
-#     test_image = test_set.dataset[r][0]
-#     input_image = test_image.view(28,28).numpy()
-#     out, mu1, logvar1 = model(Variable(test_image))
-#     output_image = out.view(28,28).data.numpy()
-
-#     plot_image = np.concatenate((input_image, output_image), axis = 1) 
-#     plt.imshow(plot_image, cmap = 'gray', interpolation = 'nearest');
-#     plt.show()
 
 # m11 = mean
 # l11 = log_variance
@@ -173,14 +168,30 @@ def train(batchsize):
 #     plt.savefig('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model/generated_images/epoch100/' + str(i) + '.png')
 #=======================================================
 
-def test(model):
-	z = torch.FloatTensor(20).normal_()
+'''def test(model):
+	z = torch.FloatTensor(128,20).normal_()
 	x = Variable(z)
 	y = model.decode(x)
-	im = y.view(28,28).data.numpy()
-	plt.imshow(im, cmap = 'gray', interpolation = 'nearest')
-	plt.savefig('./imgtest.jpg')
-	#y = numpy(y)
+	y_ = y.data.numpy()
+    y1 = y_.reshape(128,28,28)
+    print()
+
+	# plt.imshow(im, cmap = 'gray', interpolation = 'nearest')
+	# plt.savefig('./imgtest.jpg')'''
+
+def test_1(model):
+    z = torch.FloatTensor(128,20).normal_()
+    x = Variable(z)
+    y = model.decode(x)
+    y1 = y.view(128,28,28).data.numpy()
+    fig = plt.figure(figsize=(200,200))
+    for i in range(128):
+        sub = fig.add_subplot(16,8,i+1)
+        plt.subplots_adjust(wspace = 0, hspace = 0)
+        sub.imshow(y1[i,:,:], cmap = "gray", interpolation = "nearest")
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+    plt.savefig('./imgtest.jpg')
+
 #plt.imshow(output_generated_image1, cmap = 'gray', interpolation = 'nearest');
 #plt.show()
 
@@ -188,14 +199,12 @@ def test(model):
 #test(model,batchsize=batch_size)
 
 
-
-
 ############################################
-
-test(model=model)
+train(batchsize=batch_size)
+test_1(model=model)
 
 # saving model
-# torch.save(model.state_dict(), './vae.pth')
+torch.save(model.state_dict(), './vae.pth')
 
 ############################################
 
