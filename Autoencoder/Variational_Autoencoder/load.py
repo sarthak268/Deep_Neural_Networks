@@ -10,6 +10,12 @@ from torchvision import transforms
 from torchvision.utils import save_image
 from torchvision import datasets
 from torchvision.datasets import MNIST
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import random
+import sys, os
+
 
 class VAE(nn.Module):
     def __init__(self,n1,n2,latent_dimension):
@@ -49,6 +55,18 @@ class VAE(nn.Module):
         return self.decode(z), mu, logvar
 
 
+def test(model):
+	z = torch.FloatTensor(128,20).normal_()
+	x = Variable(z)
+	y = model.decode(x)
+	im = y.view(128,28,28).data.numpy()
+	fig = plt.figure(figsize=(200,200))
+	for i in range(128):
+		sub = fig.add_subplot(16,8,i+1)
+		sub.imshow(im[i,:,:], cmap="gray", interpolation="nearest")
+	#plt.imshow(im, cmap = 'gray', interpolation = 'nearest')
+	plt.savefig('./imgtest.jpg')
+
 model = VAE(784,400,20)
 model.load_state_dict(torch.load('./vae.pth'))
-
+test(model)
