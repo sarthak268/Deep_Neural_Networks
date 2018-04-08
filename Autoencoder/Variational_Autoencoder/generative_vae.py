@@ -9,13 +9,11 @@ from torchvision import transforms
 from torchvision.utils import save_image
 from torchvision import datasets
 from torchvision.datasets import MNIST
-import os
 import random
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import random
 import sys, os
 
 array = []
