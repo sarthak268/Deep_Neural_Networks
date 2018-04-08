@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys, os
 
-num_epochs = 100
+num_epochs = 250
 batch_size = 128
 learning_rate = 1e-3
 
@@ -133,10 +133,10 @@ def save_model(model):
 
 
 
-#train(batchsize = batch_size)
-#save_model(model)
+train(batchsize = batch_size)
+save_model(model)
 
-load_model()
+#load_model()
 
 
 
