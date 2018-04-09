@@ -131,13 +131,26 @@ def load_model():
 def save_model(model):
 	torch.save(model.state_dict(), './vae.pth')
 
+def linear_interpolation(z0, zt):
+    # z0 and zt in FloatTensor
+    z0n = z0.numpy()
+    ztn = zt.numpy()
+    z_middle = np.zeros(z0n.shape)
+    for i in range(z0n.shape[0]):
+        z_middle[i] = random.uniform(min(z0n[i], ztn[i]), max(z0n[i], ztn[i]))
+    z_middle_t = torch.from_numpy(z_middle)
+    return z_middle_t.float()
 
+#############################################################################
+# TRAINING A NEW MODEL
+#train(batchsize = batch_size)
+#save_model(model)
+#############################################################################
 
-train(batchsize = batch_size)
-save_model(model)
-
-#load_model()
-
+#############################################################################
+# LOADING EXISTING MODEL
+load_model()
+#############################################################################
 
 
 
