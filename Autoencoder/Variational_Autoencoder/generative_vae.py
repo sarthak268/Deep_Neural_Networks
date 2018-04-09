@@ -191,6 +191,8 @@ def test(model):
 #matplotlib.image.imsave('/Users/sarthakbhagat/Desktop/Neural_Nets/Autoencoder/Variational_Autoencoder/RESULT-generative_model_for_vae/50epoch_generated_image.jpg',output_generated_image1)
 #test(model,batchsize=batch_size)
 
+
+
 ############################################
 
 #train(batchsize=batch_size)

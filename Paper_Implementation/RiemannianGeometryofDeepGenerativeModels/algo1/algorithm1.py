@@ -9,12 +9,14 @@ from torchvision import transforms
 from torchvision.utils import save_image
 from torchvision import datasets
 from torchvision.datasets import MNIST
+from torch.autograd.gradcheck import zero_gradients
 import random
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys, os
+import math
 
 num_epochs = 250
 batch_size = 128
@@ -44,6 +46,7 @@ class VAE(nn.Module):
         self.fc4 = nn.Linear(n2, n1)
 
     def encode(self, x):
+        # h
         h1 = F.relu(self.fc1(x))
         return self.fc21(h1), self.fc22(h1)
 
@@ -54,6 +57,7 @@ class VAE(nn.Module):
         return eps.mul(std).add_(mu)
 
     def decode(self, z):
+        # g
         h3 = F.relu(self.fc3(z))
         return F.sigmoid(self.fc4(h3))
 
@@ -140,6 +144,42 @@ def linear_interpolation(z0, zt):
         z_middle[i] = random.uniform(min(z0n[i], ztn[i]), max(z0n[i], ztn[i]))
     z_middle_t = torch.from_numpy(z_middle)
     return z_middle_t.float()
+
+def find_jacobian(model, zi):
+
+
+T = 10
+epsilon = 0.1
+
+def find_etta_i(z0, z1, z2):
+    dt = 1 / T
+    e = -(1 / dt)*(decode(z2) - 2*decode(z1)+decode(z0))*find_jacobian(z1)
+    return e
+
+def sum_energy():
+    for i in range(1,T):
+        delta_e += find_energy(a[i-1],a[i],a[i+1])
+    return (math.abs((delta_e)*(delta_e)))
+
+def main(z0,zt):
+    step_size = 0.001
+    z_collection = []
+    
+    z_collection.append(z0)
+
+    for i in range(T-2):
+        w = (linear_interpolation(z0,zt))
+        z_collection.append(w)
+
+    z_collection.append(zt)
+
+    while (sum_energy > epsilon):
+        for i in range(1,T):
+            etta_i = find_energy(z_collection[i-1], z_collection[i], z_collection[i+1])
+            z_collection[i] = z_collection[i] - step_size*etta_i
+    return z_collection
+        
+
 
 #############################################################################
 # TRAINING A NEW MODEL
