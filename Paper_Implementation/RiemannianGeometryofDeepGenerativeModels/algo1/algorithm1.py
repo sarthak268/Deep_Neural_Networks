@@ -147,13 +147,14 @@ def linear_interpolation(z0, zt):
     return z_middle_t.float()
 
 def find_jacobian(model, zi):
-    decoded_mu, decoded_sigma = decode(zi)
+    x = decode(zi)
+    z = np.matmul(A2, matmul(A1, x) + b1) + b2
 
 
 T = 10
 epsilon = 0.1
 
-# def find_etta_i(z0, z1, z2):
+# def find_modified_gradient(z0, z1, z2):
 #     dt = 1 / T
 #     e = -(1 / dt)*(decode(z2) - 2*decode(z1)+decode(z0))*find_jacobian(z1)
 #     return e
@@ -177,11 +178,10 @@ epsilon = 0.1
 
 #     while (sum_energy > epsilon):
 #         for i in range(1,T):
-#             etta_i = find_energy(z_collection[i-1], z_collection[i], z_collection[i+1])
+#             etta_i = find_modified_gradient(z_collection[i-1], z_collection[i], z_collection[i+1])
 #             z_collection[i] = z_collection[i] - step_size*etta_i
 #     return z_collection
         
-
 
 #############################################################################
 # TRAINING A NEW MODEL
