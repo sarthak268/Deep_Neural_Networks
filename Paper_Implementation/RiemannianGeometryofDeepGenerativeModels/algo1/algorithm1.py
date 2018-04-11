@@ -138,18 +138,17 @@ def save_model(model):
 
 def linear_interpolation(z0, zt):
     # z0 and zt in FloatTensor
-    z0n = z0.detach().numpy()
-    ztn = zt.detach().numpy()
+    z0n = z0#.data#.detach().numpy()
+    ztn = zt#.data#.detach().numpy()
     z_middle = np.zeros(z0n.shape)
     for i in range(z0n.shape[0]):
         z_middle[i] = random.uniform(min(z0n[i], ztn[i]), max(z0n[i], ztn[i]))
     z_middle_t = torch.from_numpy(z_middle)
     return z_middle_t.float()
 
-def find_jacobian(model, z1):
+def find_jacobian(model, z1): #Jh
 	z = z1
 	dec = Variable(model.decode(z).data, requires_grad=True)
-	#dec = model.decode(z)
 	enc1, enc2 = model.encode(dec)
 	jacobian = torch.FloatTensor(20,784).zero_()
 	for j in range(20):
@@ -158,40 +157,83 @@ def find_jacobian(model, z1):
 		enc1.backward(f, retain_graph=True)
 		jacobian[j,:] = dec.grad.data
 		dec.grad.data.zero_()
-		#print("yoyo")
-	print(jacobian)
 	return jacobian
+
+def find_jacobian_1(model, z1): #Jg
+	z = z1
+	dec = model.decode(z)#, requires_grad=True)
+	jacobian = torch.FloatTensor(784,20).zero_()
+	for j in range(784):
+		f = torch.FloatTensor(784).zero_()
+		f[j] = 1	
+		dec.backward(f, retain_graph=True)
+		jacobian[j,:] = z.grad.data
+		z.grad.data.zero_()
+	return jacobian
+
 
 T = 10
 epsilon = 0.1
 z_collection = []
 delta_e = torch.FloatTensor(20,784).zero_()
 
-def find_etta_i(model,z0, z1, z2):
+def find_energy(model,z0, z1, z2):
     dt = 1 / T
-    #e = -(1 / dt)*(torch.mm(find_jacobian(model,z1)),((model.decode(z2) - 2*model.decode(z1)+model.decode(z0)).data))
-    e = -(1 / dt)*(find_jacobian(model,z1))*((model.decode(z2) - 2*model.decode(z1)+model.decode(z0)).data)
+    a1 = torch.transpose(find_jacobian_1(model,Variable(z1, requires_grad=True)),0,1)
+    a2 = ((model.decode(Variable(z2)) - 2*model.decode(Variable(z1))+model.decode(Variable(z0))).data).view(784,1)
+    #print(a2)
+    e = -(1 / dt)*(torch.mm(a1,a2))
     return e
+
+def find_etta_i(model,z0,z1,z2):
+	dt = 1/T
+	a1 = find_jacobian(model,Variable(z1))
+	a2 = ((model.decode(Variable(z2)) - 2*model.decode(Variable(z1))+model.decode(Variable(z0))).data).view(784,1)
+	print(type(a1))
+	print(type(a2))
+	print(a1.size())
+	print(a2.size())
+	e = -(1/dt)*(torch.mm(a1,a2))
+	print(e)
+	return e
+
+def find_mod(x):
+	p = 0
+	x1 = x.numpy()
+	print(x1.shape)
+	for i in range(20):
+		q = x1[i]
+		#print(type(q))
+		p += q*q
+	#print(p.shape)
+	return p[0]
 
 def sum_energy(model):
 	delta_e = torch.FloatTensor(20,784).zero_()
 	for i in range(1,T-2):
-		delta_e = find_etta_i(model,z_collection[i-1],z_collection[i],z_collection[i+1])
-	return(torch.mm(math.abs(delta_e),math.abs(delta_e)))
+		delta_e += find_etta_i(model,z_collection[i-1],z_collection[i],z_collection[i+1])
+	multi = (torch.mm((delta_e),torch.transpose(delta_e,0,1)))
+
+def sum_energy_1(model):
+	delta_e = torch.FloatTensor(20,1).zero_()
+	for i in range(1,T-2):
+		delta_e += find_energy(model,z_collection[i-1],z_collection[i],z_collection[i+1])
+	return find_mod(delta_e)
+
 
 def main(model,z0,zt):
     step_size = 0.001
+    z0 = z0.data
     z_collection.append(z0)
     
     for i in range(T-2):
         w = (linear_interpolation(z0,zt))
         z_collection.append(w)
+    zt = zt.data
     z_collection.append(zt)
-
-    while (sum_energy(model) > epsilon):
-    	#print("hello")
+    while (sum_energy_1(model) > epsilon):
     	for i in range(1,T):
-        	etta_i = find_etta_i(z_collection[i-1], z_collection[i], z_collection[i+1])
+        	etta_i = find_etta_i(model,z_collection[i-1], z_collection[i], z_collection[i+1])
         	z_collection[i] = z_collection[i] - step_size*etta_i
     return z_collection
         
