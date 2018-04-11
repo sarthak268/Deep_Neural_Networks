@@ -74,6 +74,7 @@ class VAE(nn.Module):
         z = self.reparametrize(mu, logvar)
         return self.decode(z), mu, logvar
 
+
 model = VAE(784,400,20)
 
 reconstruction_function = nn.MSELoss(size_average=False)
@@ -145,6 +146,7 @@ def linear_interpolation(z0, zt):
     z_middle_t = torch.from_numpy(z_middle)
     return z_middle_t.float()
 
+<<<<<<< HEAD
 def find_jacobian(model, z1):#, zi):
 	#z = Variable(torch.FloatTensor([[2,1]]), requires_grad=True)
 	#z = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
@@ -163,6 +165,11 @@ def find_jacobian(model, z1):#, zi):
 			z.grad.data.zero_()
 		print("yoyo")
 	return jacobian
+=======
+def find_jacobian(model, zi):
+    x = decode(zi)
+    z = np.matmul(A2, matmul(A1, x) + b1) + b2
+>>>>>>> 650ec08c073255305734eb565ce37d16658169c5
 
 
 T = 10
@@ -170,6 +177,7 @@ epsilon = 0.1
 z_collection = []
 delta_e = torch.FloatTensor(20,784).zero_()
 
+<<<<<<< HEAD
 def find_etta_i(model,z0, z1, z2):
     dt = 1 / T
     e = -(1 / dt)*find_jacobian(model,z1)*((model.decode(z2) - 2*model.decode(z1)+model.decode(z0)).data)
@@ -198,8 +206,36 @@ def main(model,z0,zt):
         	#print("jooooooooooooo")
     #         z_collection[i] = z_collection[i] - step_size*etta_i
     return z_collection
-        
+=======
+# def find_modified_gradient(z0, z1, z2):
+#     dt = 1 / T
+#     e = -(1 / dt)*(decode(z2) - 2*decode(z1)+decode(z0))*find_jacobian(z1)
+#     return e
 
+# def sum_energy():
+#     for i in range(1,T):
+#         delta_e += find_energy(a[i-1],a[i],a[i+1])
+#     return (math.abs((delta_e)*(delta_e)))
+
+# def main(z0,zt):
+#     step_size = 0.001
+#     z_collection = []
+    
+#     z_collection.append(z0)
+
+#     for i in range(T-2):
+#         w = (linear_interpolation(z0,zt))
+#         z_collection.append(w)
+
+#     z_collection.append(zt)
+
+#     while (sum_energy > epsilon):
+#         for i in range(1,T):
+#             etta_i = find_modified_gradient(z_collection[i-1], z_collection[i], z_collection[i+1])
+#             z_collection[i] = z_collection[i] - step_size*etta_i
+#     return z_collection
+>>>>>>> 650ec08c073255305734eb565ce37d16658169c5
+        
 
 #############################################################################
 # TRAINING A NEW MODEL
