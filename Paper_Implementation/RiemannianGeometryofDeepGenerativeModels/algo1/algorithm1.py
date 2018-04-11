@@ -160,8 +160,10 @@ def find_jacobian(model, z1): #Jh
 	return jacobian
 
 def find_jacobian_1(model, z1): #Jg
-	z = z1
-	dec = model.decode(z)#, requires_grad=True)
+	z = z1#.view(20)
+	print(z.size())
+	dec = model.decode(z)
+	#print("hii")
 	jacobian = torch.FloatTensor(784,20).zero_()
 	for j in range(784):
 		f = torch.FloatTensor(784).zero_()
@@ -172,40 +174,45 @@ def find_jacobian_1(model, z1): #Jg
 	return jacobian
 
 
-T = 10
+T = 4
 epsilon = 0.1
 z_collection = []
 delta_e = torch.FloatTensor(20,784).zero_()
 
 def find_energy(model,z0, z1, z2):
     dt = 1 / T
+    #print("hello")
+    a11 = find_jacobian_1(model,Variable(z1, requires_grad=True))
+    #print("yoyoyo")
     a1 = torch.transpose(find_jacobian_1(model,Variable(z1, requires_grad=True)),0,1)
+    #print("bye")
     a2 = ((model.decode(Variable(z2)) - 2*model.decode(Variable(z1))+model.decode(Variable(z0))).data).view(784,1)
-    #print(a2)
     e = -(1 / dt)*(torch.mm(a1,a2))
     return e
 
 def find_etta_i(model,z0,z1,z2):
 	dt = 1/T
+	z0 = z0.view(20)
+	z1 = z1.view(20)
+	z2 = z2.view(20)
 	a1 = find_jacobian(model,Variable(z1))
-	a2 = ((model.decode(Variable(z2)) - 2*model.decode(Variable(z1))+model.decode(Variable(z0))).data).view(784,1)
-	print(type(a1))
-	print(type(a2))
-	print(a1.size())
-	print(a2.size())
-	e = -(1/dt)*(torch.mm(a1,a2))
-	print(e)
+	x1 = model.decode(Variable(z2))
+	x2 = 2*model.decode(Variable(z1))
+	x3 = model.decode(Variable(z0))
+	#print("hello",x3)
+	#a21 = ((model.decode(Variable(z2)) - 2*model.decode(Variable(z1)) + model.decode(Variable(z0))).data)
+	a21 = (x1-x2+x3).data
+	#print(a21.size())
+	a2 = a21.view(784,1)
+	e = -(1 / dt)*torch.mm(a1,a2)
 	return e
 
 def find_mod(x):
 	p = 0
 	x1 = x.numpy()
-	print(x1.shape)
 	for i in range(20):
 		q = x1[i]
-		#print(type(q))
 		p += q*q
-	#print(p.shape)
 	return p[0]
 
 def sum_energy(model):
@@ -213,16 +220,17 @@ def sum_energy(model):
 	for i in range(1,T-2):
 		delta_e += find_etta_i(model,z_collection[i-1],z_collection[i],z_collection[i+1])
 	multi = (torch.mm((delta_e),torch.transpose(delta_e,0,1)))
+	return multi
 
 def sum_energy_1(model):
 	delta_e = torch.FloatTensor(20,1).zero_()
 	for i in range(1,T-2):
-		delta_e += find_energy(model,z_collection[i-1],z_collection[i],z_collection[i+1])
+		delta_e += find_energy(model,z_collection[i-1].view(20),z_collection[i].view(20),z_collection[i+1].view(20))
 	return find_mod(delta_e)
 
 
 def main(model,z0,zt):
-    step_size = 0.001
+    step_size = 0.1
     z0 = z0.data
     z_collection.append(z0)
     
@@ -231,13 +239,14 @@ def main(model,z0,zt):
         z_collection.append(w)
     zt = zt.data
     z_collection.append(zt)
+    j=0
     while (sum_energy_1(model) > epsilon):
-    	for i in range(1,T):
+    	for i in range(1,T-1):
         	etta_i = find_etta_i(model,z_collection[i-1], z_collection[i], z_collection[i+1])
-        	z_collection[i] = z_collection[i] - step_size*etta_i
+        	e1 = step_size*etta_i
+        	z_collection[i] = z_collection[i].view(20,1)
+        	z_collection[i] = z_collection[i] - e1
     return z_collection
-        
-
 
 #############################################################################
 # TRAINING A NEW MODEL
@@ -249,7 +258,6 @@ def main(model,z0,zt):
 # LOADING EXISTING MODEL
 load_model()
 #############################################################################
-
 
 z0 = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
 zt = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
