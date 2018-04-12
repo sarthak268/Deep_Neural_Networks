@@ -143,6 +143,7 @@ def linear_interpolation(z0, zt):
     z_middle = np.zeros(z0n.shape)
     for i in range(z0n.shape[0]):
         z_middle[i] = random.uniform(min(z0n[i], ztn[i]), max(z0n[i], ztn[i]))
+        #print(z_middle[i])
     z_middle_t = torch.from_numpy(z_middle)
     return z_middle_t.float()
 
@@ -174,8 +175,8 @@ def find_jacobian_1(model, z1): #Jg
 	return jacobian
 
 
-T = 4
-epsilon = 0.1
+T = 10
+epsilon = 5
 z_collection = []
 delta_e = torch.FloatTensor(20,784).zero_()
 
@@ -228,6 +229,13 @@ def sum_energy_1(model):
 		delta_e += find_energy(model,z_collection[i-1].view(20),z_collection[i].view(20),z_collection[i+1].view(20))
 	return find_mod(delta_e)
 
+def make_image(z,name):
+    print(z)
+    x = model.decode(Variable(z))
+    x = x.view(28,28)
+    img = x.data.numpy()
+    plt.imshow(img, cmap = 'gray', interpolation = 'nearest')
+    plt.savefig('./'+name+'.jpg')
 
 def main(model,z0,zt):
     step_size = 0.1
@@ -240,12 +248,17 @@ def main(model,z0,zt):
     zt = zt.data
     z_collection.append(zt)
     j=0
+    print("hello")
+    print(sum_energy_1(model))
     while (sum_energy_1(model) > epsilon):
+    	print(sum_energy_1(model))
     	for i in range(1,T-1):
         	etta_i = find_etta_i(model,z_collection[i-1], z_collection[i], z_collection[i+1])
         	e1 = step_size*etta_i
         	z_collection[i] = z_collection[i].view(20,1)
         	z_collection[i] = z_collection[i] - e1
+    for p in range(4):
+    	make_image(z=z_collection[p].view(20),name=str(p))
     return z_collection
 
 #############################################################################
@@ -262,17 +275,14 @@ load_model()
 z0 = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
 zt = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
 zt1 = Variable(torch.FloatTensor(20).normal_(), requires_grad=True)
-#find_etta_i(model=model,z0=z0,z1=zt,z2=zt1)
+
 main(model=model,z0=z0, zt=zt)
-#find_etta_i(model,z_collection[0],z_collection[1],z_collection[2])
-#find_etta_i(model=model,z0=z0,z1=zt,z2=zt1)
-#sum_energy(model=model)
-#find_jacobian(model=model, z1=zt)
 
 
 
 
 
+		
 
 
 
