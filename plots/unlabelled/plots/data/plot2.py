@@ -17,10 +17,13 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys, os
+from os import path
 import math
 from random import randint
+import matplotlib.image as mpimg
 
-batchsize = 100
+
+batchsize = 75
 
 class VAE(nn.Module):
 	def __init__(self,n1,n2,n3,latent_dimension):
@@ -98,32 +101,32 @@ def find_jacobian_1(model, z1): #Jg
 		z.grad.data.zero_()
 	return jacobian
 
+def rgb2gray(rgb):
+    return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
+
 def sample(model):
 	array1 = []
 	array2 = []
-	test_set = torch.utils.data.DataLoader(datasets.MNIST('./data/resized_0',train=False,download=True,transform=transforms.ToTensor()),batch_size=batchsize, shuffle=True)
+	folder = path.realpath("./resized_0")
+	images = os.listdir(folder)
 	count = 0
-	for batch_idx, data in enumerate(test_set):
-			img, _ = data
-			
-			img = img.view(img.size(0), -1)
-			img = Variable(img)
-			z,z_ = model.encode(img)
-			#xx = randint(0,15)
-			#z = z[xx,:]
-			for k in range(100):
-				#print("size",z.size())
-				z1 = z[k,:]
-				z1 = Variable(z1, requires_grad=True)
-				j1 = find_jacobian(model,z1)
-				u1, sigma1, vh1 = torch.svd(j1)
-				array1.append(sigma1)
-				j2 = find_jacobian_1(model,z1)
-				u2, sigma2, vh2 = torch.svd(j2)
-				array2.append(sigma2)
-			count += 1
-			if(count==1):
-				break
+	for i in images:
+		img = mpimg.imread("./resized_0/"+i)
+		img = rgb2gray(img)
+		img = img.reshape(784)
+		img = Variable(torch.FloatTensor(img))
+		z1,z_ = model.encode(img)
+		z1 = Variable(z1, requires_grad=True)
+		j1 = find_jacobian(model,z1)
+		u1, sigma1, vh1 = torch.svd(j1)
+		array1.append(sigma1)
+		j2 = find_jacobian_1(model,z1)
+		u2, sigma2, vh2 = torch.svd(j2)
+		array2.append(sigma2)
+		count += 1
+		print(count)
+		if(count==75):
+			break
 	data1 = []
 	data2 = []
 
@@ -151,9 +154,10 @@ plt.plot(d1)
 plt.show()
 #plt.savefig("jacobian.jpg")
 
+
 plt.plot(d2)
 plt.show()
-plt.savefig("together.jpg")
+plt.savefig("jacobi_together.jpg")
 
 
 

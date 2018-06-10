@@ -59,8 +59,6 @@ class VAE(nn.Module):
 		return z
 
 	def forward(self, x):
-		global mean
-		global log_variance
 		mu, logvar = self.encode(x)
 		mean = mu
 		log_variance = logvar
@@ -75,11 +73,13 @@ def load_model():
 def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
-
 model = VAE(784,450,200,20)
 model = load_model()
 
 classwise_folder = '../unlabelled/plots/data/'
+
+means = []
+stds = []
 
 for j in range(10):
 	number = str(j)
@@ -96,22 +96,89 @@ for j in range(10):
 		arr[:,count] = z
 		count += 1
 	mean = arr.mean(dim=1)
-	print ('mean for ' + number + ' is ' + str(mean))
+	means.append(mean)
 	std = arr.std(dim=1)
-	print ('std for ' + number + ' is ' + str(std))
+	stds.append(std)
+
+# plt.plot(means)
+# plt.xlabel('Classes')
+# plt.ylabel('Average Value of Mean')
+# plt.show()
+# plt.savefig('mean.jpg')
 	
-	
-	
-
-	
-
-
-
+# plt.plot(stds)
+# plt.xlabel('Classes')
+# plt.ylabel('Average Value of Standard Deviation')
+# plt.show()
+# plt.savefig('std.jpg')
 
 
+# MEAN
+# arr = []
+# for i in range(20):
+# 	for j in range(len(means)):
+# 		k = means[j][i]
+# 		arr.append(k)
+# 	plt.plot(arr)
+# 	arr = []
+# plt.show()
+# plt.savefig('mean.jpg')
 
+# STD
+# arr2 = []
+# arr3 = []
+# for i in range(20):
+# 	for j in range(len(means)):
+# 		k = stds[j][i]
+# 		arr2.append(k)
+# 	arr3.append(arr2)
+# 	arr2 = []
+# #	plt.plot(arr)
+# # 	arr = []
+# # plt.show()
+# # plt.savefig('std.jpg')
 
+# arr1 = [0,1,2,3,4,5,6,7,8,9]
 
+# arr = []
+# for i in range(20):
+# 	for j in range(len(means)):
+# 		k = means[j][i]
+# 		arr.append(k)
+# 		std = arr3[i]
+# 	#plt.plot(arr)
+# 	# print (len(arr1))
+# 	# print (len(arr))
+# 	# print (len(std))
+# 	plt.errorbar(arr1,arr,xerr=0,yerr=10,fmt='-o')
+# 	arr = []
+# plt.show()
+# plt.savefig('together.jpg')
+
+x = np.array([0,1,2,3,4,5,6,7,8,9])
+print(x.shape)
+
+##########################################################################################
+# mean for 1st element of each class
+mean0 = [] 
+# std for 1st element of each class
+std0 = []
+
+for j in range(20): 
+	for i in range(10):
+		mean0.append(float(means[i][j]))
+		std0.append(float(stds[i][j]))
+
+	mean0 = np.asarray(mean0)
+	print(mean0.shape)
+	std0 = np.asarray(std0)
+	print(std0.shape)
+	plt.errorbar(x,mean0,std0,fmt='-o')
+	mean0 = []
+	std0 = []
+
+plt.show()
+plt.savefig('together.jpg')
 
 
 
