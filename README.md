@@ -16,6 +16,6 @@ Our work borrows motivation from the following papers :
 ## Contents
 1. Autoencoder: Contains files for implementing a basic Variational Autoencoder (VAE) of two types - generative and non-generative, for MNIST Dataset along with its results.  
 2. GANS: Contains files for implementing a basic Generative Adversarial Network along with its results.
-3. NN_different_datasets: Contains files for implementing neural networks on different datasets (CIFAR10).
+3. NN_different_datasets: Contains files for implementing Neural Networks on different datasets (CIFAR10).
 4. SavedModels: Contains saved models (.pt files) for different networks for various datasets.
 5. plots: Contains files for various plots for interpreting purposes of different networks like loss plot, plotting class-wise mean and standard deviation etc.
